@@ -5,6 +5,7 @@ import (
 	"strings"
 	"net"
 	"chathome/db"
+	"strconv"
 )
 
 const (
@@ -104,7 +105,12 @@ func (self *Server) broadcast(message string) {
 }
 
 func (self *Server) sending(message string) {
-
+	cms := strings.Split(message, P_SP_RCV)
+	uid, err := strconv.Atoi(cms[0])
+	if err != nil {
+		return
+	}
+	self.clients[uid].outgoing <- cms[1]
 }
 
 
@@ -149,7 +155,9 @@ func makeMsg(name string, msg string) string {
 }
 
 func makeSendingMsg(name string, msg string) string {
-	P_SEND_MSG + P_SP_RCV
+	cms := strings.Split(msg, P_SP)
+	mms := strings.Split(cms[0], P_SP_SEND)
+	return mms[1] + P_SP_RCV + P_SEND_MSG + P_SP_SEND +  P_SP + name + ":" + cms[1]
 }
 
 
