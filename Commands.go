@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"chathome/db"
 )
 
 type Command struct {
@@ -57,7 +58,14 @@ func doReg(server *Server, client *Client, arg string) {
 }
 
 func doLogin(server *Server, client *Client, arg string) {
-
+	args := strings.Split(arg, P_SP_ARG)
+	var ok bool
+	client.uid, client.name, client.token, ok = db.Login(args[0], args[1])
+	if (ok) {
+		client.outgoing <- P_RS_LOGIN + P_SP + client.name
+	} else {
+		client.outgoing <- P_RS_LOGIN + P_SP + P_RS_ERR + E_CODE_PWD
+	}
 }
 
 func changeName(server *Server, client *Client, arg string) {
@@ -72,10 +80,10 @@ func doQuit(server *Server, client *Client, arg string) {
 }
 
 func doShowUsers(server *Server, client *Client, arg string) {
-	var users string = "Command Result:user_list<-ALL"
+	var result string = P_CALL_USER_LIST + P_SP + "ALL:-1"
 	for _, r_client := range server.clients {
-		users = users + "," + r_client.name
+		result = fmt.Sprintf("%s,%s:%d", result, r_client.name, r_client.uid)
 	}
-	client.outgoing <- users
+	client.outgoing <- result
 }
 

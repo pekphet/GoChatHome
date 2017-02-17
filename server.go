@@ -114,11 +114,11 @@ func (self *Server) sending(message string) {
 }
 
 
-func (self *Server) leave(uid int) {
-	if self.clients[uid].conn != nil {
-		delete(self.connClients, self.clients[uid].conn)
-		self.clients[uid].conn.Close()
-		delete(self.clients, uid)
+func (self *Server) leave(conn	net.Conn) {
+	if conn != nil {
+		delete(self.clients, self.connClients[conn].uid)
+		conn.Close()
+		delete(self.connClients, conn)
 	}
 	self.generateToken()
 }
@@ -158,17 +158,4 @@ func makeSendingMsg(name string, msg string) string {
 	cms := strings.Split(msg, P_SP)
 	mms := strings.Split(cms[0], P_SP_SEND)
 	return mms[1] + P_SP_RCV + P_SEND_MSG + P_SP_SEND +  P_SP + name + ":" + cms[1]
-}
-
-
-func getUserFromMsg(msg string) string {
-	return strings.Split(msg, ":")[0]
-}
-
-func parseSentMsg(msg string) (string, string) {
-	tmpStr := strings.Split(msg, ":")
-	log.Printf("tmpstr0:%s, 1:%s", tmpStr[0], tmpStr[1])
-	tmpp := strings.Split(tmpStr[0], "->")
-	log.Printf("tmpp0:%s, 1:%s", tmpp[0], tmpp[1])
-	return tmpp[0] + ":" + tmpStr[1], tmpp[1]
 }

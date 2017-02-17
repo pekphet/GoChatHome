@@ -25,12 +25,13 @@ func CreateClient(conn net.Conn) *Client {
 	writer := bufio.NewWriter(conn)
 
 	client := &Client{
-		conn:  	conn,
+		uid	: 0,
+		conn	: conn,
 		incoming: make(Message),
 		outgoing: make(Message),
-		quiting:  make(chan net.Conn),
-		reader:   reader,
-		writer:   writer,
+		quiting	: make(chan net.Conn),
+		reader	: reader,
+		writer	: writer,
 	}
 	client.Listen()
 	return client

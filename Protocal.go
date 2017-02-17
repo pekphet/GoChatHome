@@ -35,7 +35,7 @@ const (
 	/**
 	 *  Errors
 	 */
-	P_RS_ERR	= "ERROR"
+	P_RS_ERR	= "ERROR:"
 	E_CODE_EXISTS	= "101"		//USER IS EXISTS
 	E_CODE_PWD	= "102"		//PWD IS WRONG
 
