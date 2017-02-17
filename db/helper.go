@@ -7,7 +7,7 @@ import (
 
 var gDB *sql.DB
 
-func StartDB() {
+func init(){
 	db, err := sql.Open("mysql", "dev:@Dev1991@tcp(localhost:53306)/go_android_im")
 	if (err != nil) {
 		log.Fatal(err)
@@ -22,9 +22,9 @@ func CloseDB() {
 }
 
 func Reg(name string, acc string, pwd string) bool {
-	return insertAcc(gDB, name, acc, pwd)
+	return insertAcc(name, acc, pwd)
 }
 
 func Login(acc string, pwd string) (uid int, name string, token string, ok bool){
-	return login(gDB, acc, pwd)
+	return login(acc, pwd)
 }
