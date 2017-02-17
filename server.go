@@ -4,7 +4,7 @@ import (
 	"log"
 	"strings"
 	"net"
-	"chathome/db"
+	_ "chathome/db"
 	"strconv"
 )
 
@@ -22,6 +22,7 @@ func (self *Server) takeToken() {
 
 func CreateServer() *Server {
 	server := &Server{
+		connClients:	make(ConnClientTable, MAX_CLIENTS),
 		clients:        make(ClientTable, MAX_CLIENTS),
 		tokens:         make(Token, MAX_CLIENTS),
 		pending:        make(chan net.Conn),
@@ -30,7 +31,6 @@ func CreateServer() *Server {
 		outgoing:       make(Message),
 		broadcasting:   make(Message),
 	}
-	db.StartDB()
 	server.listen()
 	return server
 }
@@ -100,7 +100,7 @@ func (self *Server) join(conn net.Conn) {
 func (self *Server) broadcast(message string) {
 	log.Printf("broadcast: %s\n", message)
 	for _, client := range self.clients {
-		client.outgoing <- message
+		client.incoming <- message
 	}
 }
 
@@ -110,7 +110,7 @@ func (self *Server) sending(message string) {
 	if err != nil {
 		return
 	}
-	self.clients[uid].outgoing <- cms[1]
+	self.clients[uid].incoming <- cms[1]
 }
 
 
@@ -147,6 +147,10 @@ func (self *Server) Start(connStr string) {
 }
 func (self *Server) Stop() {
 	self.listener.Close()
+}
+
+func (server *Server) makeClientUIDIndex(c *Client) {
+	server.clients[c.uid] = c
 }
 
 /***SMART METHODS***/

@@ -41,9 +41,9 @@ func parseCmd(msg string) (cmd Command, err error) {
 	return
 }
 
-func (self *Server) executeCmd(client *Client, cmd Command) (err error) {
+func (server *Server)executeCmd(client *Client, cmd Command) (err error) {
 	if f, ok := commands[cmd.cmd]; ok {
-		f(self, client, cmd.arg)
+		f(server, client, cmd.arg)
 		return
 	}
 	err = errors.New("Unknown Command: " + cmd.cmd)
@@ -54,7 +54,12 @@ func (self *Server) executeCmd(client *Client, cmd Command) (err error) {
  *   call methods
  */
 func doReg(server *Server, client *Client, arg string) {
-
+	args := strings.Split(arg, ",")
+	if db.Reg(args[0], args[1], args[2]) {
+		client.incoming <- P_RS_REG + P_SP + P_RS_SUCCESS
+	} else {
+		client.GetIncoming() <- P_RS_REG + P_SP + P_RS_ERR + E_CODE_EXISTS
+	}
 }
 
 func doLogin(server *Server, client *Client, arg string) {
@@ -62,21 +67,16 @@ func doLogin(server *Server, client *Client, arg string) {
 	var ok bool
 	client.uid, client.name, client.token, ok = db.Login(args[0], args[1])
 	if (ok) {
-		client.outgoing <- P_RS_LOGIN + P_SP + client.name
+		client.incoming <- P_RS_LOGIN + P_SP + client.name
+		server.makeClientUIDIndex(client)
 	} else {
-		client.outgoing <- P_RS_LOGIN + P_SP + P_RS_ERR + E_CODE_PWD
+		client.incoming <- P_RS_LOGIN + P_SP + P_RS_ERR + E_CODE_PWD
 	}
-}
-
-func changeName(server *Server, client *Client, arg string) {
-	oldname := client.name
-	client.name = arg
-	server.broadcast(fmt.Sprintf("Notification: %s changed its name to %s", oldname, arg))
 }
 
 func doQuit(server *Server, client *Client, arg string) {
 	client.quit()
-	server.broadcast(fmt.Sprintf("Notification: %s quit the chat room.", client.name))
+	server.broadcast(fmt.Sprintf("通知: %s 已退出.", client.name))
 }
 
 func doShowUsers(server *Server, client *Client, arg string) {
@@ -84,6 +84,6 @@ func doShowUsers(server *Server, client *Client, arg string) {
 	for _, r_client := range server.clients {
 		result = fmt.Sprintf("%s,%s:%d", result, r_client.name, r_client.uid)
 	}
-	client.outgoing <- result
+	client.incoming <- result
 }
 

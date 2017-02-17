@@ -37,42 +37,46 @@ func CreateClient(conn net.Conn) *Client {
 	return client
 }
 
-func (self *Client) Listen() {
-	go self.Read()
-	go self.Write()
+func (client *Client) Listen() {
+	go client.read()
+	go client.write()
 }
 
-func (self *Client) Read() {
+func (client *Client) read() {
 	for {
-		if line, _, err := self.reader.ReadLine(); err == nil {
-			self.incoming <- string(line)
+		if line, _, err := client.reader.ReadLine(); err == nil {
+			client.incoming <- string(line)
 		} else {
 			log.Printf("Read error: %s\n", err)
-			self.quit()
+			client.quit()
 			return
 		}
 	}
 }
 
-func (self *Client) Write() {
-	for data := range self.outgoing {
-		if _, err := self.writer.WriteString(data + "\n"); err != nil {
-			self.quit()
+func (client *Client) write() {
+	for data := range client.outgoing {
+		if _, err := client.writer.WriteString(data + "\n"); err != nil {
+			client.quit()
 			return
 		}
 
-		if err := self.writer.Flush(); err != nil {
+		if err := client.writer.Flush(); err != nil {
 			log.Printf("Write error: %s\n", err)
-			self.quit()
+			client.quit()
 			return
 		}
 	}
 }
 
-func (self *Client) quit() {
-	self.quiting <- self.conn
+func (client *Client) quit() {
+	client.quiting <- client.conn
 }
 
-func (self *Client) GetIncoming() Message {
-	return self.incoming
+func (client *Client) GetIncoming() Message {
+	return client.incoming
+}
+
+func (client *Client) PutOutgoing() Message {
+	return client.outgoing
 }
