@@ -58,7 +58,7 @@ func doReg(server *Server, client *Client, arg string) {
 	if db.Reg(args[0], args[1], args[2]) {
 		client.incoming <- P_RS_REG + P_SP + P_RS_SUCCESS
 	} else {
-		client.GetIncoming() <- P_RS_REG + P_SP + P_RS_ERR + E_CODE_EXISTS
+		client.incoming <- P_RS_REG + P_SP + P_RS_ERR + E_CODE_EXISTS
 	}
 }
 

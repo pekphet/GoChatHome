@@ -31,6 +31,7 @@ const (
 
 	P_RS_LOGIN		= "LOGIN"
 	P_RS_REG		= "REGISTER"
+	P_RS_USER_LIST		= "USER_LIST"
 
 	/**
 	 *  Errors

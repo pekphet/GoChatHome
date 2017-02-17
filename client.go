@@ -73,10 +73,10 @@ func (client *Client) quit() {
 	client.quiting <- client.conn
 }
 
-func (client *Client) GetIncoming() Message {
-	return client.incoming
+func (client *Client) GetIncoming() string {
+	return <- client.incoming
 }
 
-func (client *Client) PutOutgoing() Message {
-	return client.outgoing
+func (client *Client) PutOutgoing(msg string) {
+	client.outgoing <- msg
 }
