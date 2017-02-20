@@ -56,9 +56,9 @@ func (server *Server)executeCmd(client *Client, cmd Command) (err error) {
 func doReg(server *Server, client *Client, arg string) {
 	args := strings.Split(arg, ",")
 	if db.Reg(args[0], args[1], args[2]) {
-		client.incoming <- P_RS_REG + P_SP + P_RS_SUCCESS
+		client.outgoing <- P_RS_REG + P_SP + P_RS_SUCCESS
 	} else {
-		client.incoming <- P_RS_REG + P_SP + P_RS_ERR + E_CODE_EXISTS
+		client.outgoing <- P_RS_ERR + E_CODE_EXISTS
 	}
 }
 
@@ -67,10 +67,10 @@ func doLogin(server *Server, client *Client, arg string) {
 	var ok bool
 	client.uid, client.name, client.token, ok = db.Login(args[0], args[1])
 	if (ok) {
-		client.incoming <- P_RS_LOGIN + P_SP + client.name
+		client.outgoing <- P_RS_LOGIN + P_SP + client.name
 		server.makeClientUIDIndex(client)
 	} else {
-		client.incoming <- P_RS_LOGIN + P_SP + P_RS_ERR + E_CODE_PWD
+		client.outgoing <- P_RS_ERR + E_CODE_PWD
 	}
 }
 
@@ -84,6 +84,6 @@ func doShowUsers(server *Server, client *Client, arg string) {
 	for _, r_client := range server.clients {
 		result = fmt.Sprintf("%s,%s:%d", result, r_client.name, r_client.uid)
 	}
-	client.incoming <- result
+	client.outgoing <- result
 }
 

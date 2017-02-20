@@ -100,7 +100,7 @@ func (self *Server) join(conn net.Conn) {
 func (self *Server) broadcast(message string) {
 	log.Printf("broadcast: %s\n", message)
 	for _, client := range self.clients {
-		client.incoming <- message
+		client.outgoing <- message
 	}
 }
 
@@ -110,7 +110,7 @@ func (self *Server) sending(message string) {
 	if err != nil {
 		return
 	}
-	self.clients[uid].incoming <- cms[1]
+	self.clients[uid].outgoing <- cms[1]
 }
 
 

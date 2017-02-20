@@ -11,6 +11,10 @@ import (
 )
 
 func insertAcc(name string, acc string, pwd string) bool {
+	if isUserExists(name) {
+		log.Println("nickname is exists~")
+		return false
+	}
 	stmt, err := gDB.Prepare("INSERT account SET acc=?,pwd=?")
 	if err != nil {
 		log.Fatal(err)
@@ -90,4 +94,11 @@ func generateToken(uid int) string {
 	h := md5.New()
 	io.WriteString(h, strconv.FormatInt(time.Now().Unix(), 10))
 	return fmt.Sprintf("%x", h.Sum(nil))
+}
+
+func isUserExists(nick string) bool {
+	row := gDB.QueryRow("SELECT uid FROM usr WHERE nick=?", nick)
+	var uid int
+	err := row.Scan(&uid)
+	return err == nil
 }
